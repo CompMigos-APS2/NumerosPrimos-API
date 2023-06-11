@@ -1,10 +1,13 @@
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 from peewee import *
 import math
 
 pg_db = PostgresqlDatabase('numerosprimos', user='postgres', password='admin', host='localhost', port=5432)
 app = Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
+cors = CORS(app, resources={r"/": {"origins": "*"}})
 
 def crivo(n):
     lim = int(2 * n * math.log(n))
