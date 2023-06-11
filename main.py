@@ -1,8 +1,9 @@
-import psycopg2
+from flask import Flask, request, jsonify, Response
 from peewee import *
 import math
 
 pg_db = PostgresqlDatabase('numerosprimos', user='postgres', password='admin', host='localhost', port=5432)
+app = Flask(__name__)
 
 
 def crivo(n):
@@ -26,6 +27,7 @@ class Products(Model):
     factor1 = DoubleField()
     factor2 = DoubleField()
     product = DoubleField(unique=True, primary_key=True)
+
     class Meta:
         database = pg_db
         db_table = 'produtos'
@@ -52,3 +54,17 @@ while (escolha != 0):
                     Products.create(factor1=primos[i], factor2=primos[j], product=primos[i] * primos[j])
                 except:
                     print("Chave duplicada")
+
+
+@app.route("/", methods=['GET'])
+def getFromKey():
+    args = request.args
+    key = args.get('key')
+    prods = Products.select().where(Products.product == key)
+    if len(prods) > 0:
+        prod = prods.first()
+        return jsonify({"factor1": prod.factor1, "factor2": prod.factor2})
+    else:
+        return Response("Key not found", status=400)
+
+app.run()
